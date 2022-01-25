@@ -3,3 +3,12 @@
 *.pyc
 .vccode
 *.json
+**/.debhelper/
+**/debian/ros-noetic-yocs-cmd-vel-mux/
+**/debian/files
+**/debian/ros-noetic-yocs-cmd-vel-mux.debhelper.log
+**/debian/ros-noetic-yocs-cmd-vel-mux.substvars
+**/obj-x86_64-linux-gnu/
+**/*.deb
+**/*.*ddeb
+**/.idea
