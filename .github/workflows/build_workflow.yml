@@ -48,7 +48,7 @@ jobs:
           path: /debians/
           retention-days: 1
   deploy:
-#    if: ${{ github.ref_name == 'noetic' || github.ref_name == 'noetic-devel' }}
+    if: ${{ github.ref_name == 'noetic' || github.ref_name == 'noetic-devel' }}
     name: Aptly Deploy
     needs:
       - debianize
