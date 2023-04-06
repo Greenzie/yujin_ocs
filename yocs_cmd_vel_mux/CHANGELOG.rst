@@ -2,8 +2,9 @@
 Changelog for package yocs_cmd_vel_mux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.6.3 (2014-12-05)
-------------------
+Forthcoming
+-----------
+* Adds support for Noetic
 
 0.6.2 (2014-11-30)
 ------------------
