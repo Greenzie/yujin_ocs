@@ -28,7 +28,9 @@ jobs:
           command: greenzie-release changelog -r "${ROS_DISTRO}"
       - run:
           name: "Package debs (debuild)"
-          command: GITHUB_WORKSPACE="$PWD" greenzie-debianize all
+          command: |
+            cd yocs_cmd_vel_mux
+            GITHUB_WORKSPACE="$PWD" greenzie-debianize all
       - store_artifacts:
           path: /debians
       - persist_to_workspace:
