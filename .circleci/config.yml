@@ -1,57 +1,52 @@
 version: 2.1
 
+orbs:
+  greenzie: greenzie/build_and_publish_debs@0.1.1
+
+parameters:
+  manual-deploy:
+    type: boolean
+    default: false
+
 workflows:
   version: 2
   pushbuild:
+    unless: << pipeline.parameters.manual-deploy >>
     jobs:
-      - debian_build
-      - deploy:
-          filters:
-            branches:
-              only:
-                - noetic
+      - greenzie/debian_build_simple:
+          name: "amd_debian_build"
+          context: GREENZIE
+          platform: amd64
+          executor: greenzie/debianize_amd64
+          generate_changelog: true
+
+      - greenzie/debian_build_simple:
+          name: "arm64_debian_build"
+          context: GREENZIE
+          platform: arm64
+          executor: greenzie/debianize_arm64
+          generate_changelog: true
+
+  manualdeploy:
+    when: << pipeline.parameters.manual-deploy >>
+    jobs:
+      - greenzie/debian_build_simple:
+          name: "amd_debian_build"
+          context: GREENZIE
+          platform: amd64
+          executor: greenzie/debianize_amd64
+          generate_changelog: true
+
+      - greenzie/debian_build_simple:
+          name: "arm64_debian_build"
+          context: GREENZIE
+          platform: arm64
+          executor: greenzie/debianize_arm64
+          generate_changelog: true
+
+      - greenzie/debian_deploy_experimental:
+          name: "deploy_all_greenzie"
+          context: GREENZIE
           requires:
-            - debian_build
-
-jobs:
-  debian_build:
-    docker:
-      - image: greenzie/debianize-experimental:focal-noetic
-        auth:
-          username: $DOCKERHUB_GREENZIE_USERNAME
-          password: $DOCKERHUB_GREENZIE_PASSWORD
-    resource_class: small
-    steps:
-      - checkout
-      - run:
-          name: "Generate Changelogs"
-          command: greenzie-release changelog -r "${ROS_DISTRO}"
-      - run:
-          name: "Package debs (debuild)"
-          command: |
-            cd yocs_cmd_vel_mux
-            GITHUB_WORKSPACE="$PWD" greenzie-debianize all
-      - store_artifacts:
-          path: /debians
-      - persist_to_workspace:
-          root: /debians
-          paths:
-            - '*'
-
-  deploy:
-    docker:
-      - image: greenzie/aptly:3.19.1-focal-noetic
-        auth:
-          username: $DOCKERHUB_GREENZIE_USERNAME
-          password: $DOCKERHUB_GREENZIE_PASSWORD
-    resource_class: small
-    steps:
-      - add_ssh_keys
-      - attach_workspace:
-          at: /debians
-      - run:
-          name: Deploy to aptly.greenzie.com
-          environment:
-            SERVER_HOSTNAME: aptly.greenzie.com
-          command: |
-            aptly repo deploy -r experimental -n "${CIRCLE_BUILD_NUM}" -p "/debians"
+            - amd_debian_build
+            - arm64_debian_build
